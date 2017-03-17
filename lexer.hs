@@ -32,11 +32,14 @@ splitSemi = split (\x -> x == ';')
 
 -- get next assignment
 assignment :: String -> (Maybe Statement, String)
-assignment prog = if valid then (Just (Assignment var num), remains) else (Nothing, remains)
+assignment prog = if valid then (Just (Assignment var num), remains) else (Nothing, prog)
   where
     (var, prog0)   = splitId prog
     (_, prog1)     = splitEq prog0
     (num, prog2)   = splitNum prog1
     (_, remains)   = splitSemi prog2
-    valid = (num /= "") && (var /= "")  
+    valid = (num /= "") && (var /= "")
+
+
+
 
