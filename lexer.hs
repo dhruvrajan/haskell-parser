@@ -4,9 +4,12 @@
 
 module Lexer where
 import Data.Char
+import Data.Maybe
 
 data Statement = Assignment String String
   | Declaration String deriving (Eq, Show)
+
+type Program = [Maybe Statement]
 
 -- Generic split
 split :: (Char -> Bool) -> String -> (String, String)
@@ -51,3 +54,13 @@ statement prog = result
                         then (Just (Assignment var num), remains)
                         else (Just (Declaration var), remains)
                  else (Nothing, prog)
+
+-- parse the whole program
+program :: String -> Maybe Program
+program ""   = Just []
+program prog = if (isNothing rest) then Nothing else Just (statement0 : (fromJust rest))
+  where
+    line = statement prog
+    (statement0, remaining) = line
+    rest0 = program remaining
+    rest = if isNothing statement0  then Nothing else rest0
