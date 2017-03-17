@@ -5,7 +5,8 @@
 module Lexer where
 import Data.Char
 
-data Statement = Assignment String String deriving (Eq, Show)
+data Statement = Assignment String String
+  | Declaration String deriving (Eq, Show)
 
 -- Generic split
 split :: (Char -> Bool) -> String -> (String, String)
@@ -30,16 +31,23 @@ splitNum = split isDigit
 splitSemi :: String -> (String, String)
 splitSemi = split (\x -> x == ';')
 
--- get next assignment
-assignment :: String -> (Maybe Statement, String)
-assignment prog = if valid then (Just (Assignment var num), remains) else (Nothing, prog)
+-- get next statement
+statement :: String -> (Maybe Statement, String)
+statement prog = result
   where
-    (var, prog0)   = splitId prog
-    (_, prog1)     = splitEq prog0
-    (num, prog2)   = splitNum prog1
-    (_, remains)   = splitSemi prog2
-    valid = (num /= "") && (var /= "")
+    -- Perform splits
+    (var, prog0)    = splitId prog
+    (eq, prog1)     = splitEq prog0
+    (num, prog2)    = splitNum prog1
+    (semi, remains) = splitSemi prog2
 
-
-
-
+    -- Calculate result
+    varExists = var /= ""
+    eqExists  = eq  /= ""
+    numExists = num /= ""
+    semiExists = semi /= ""
+    result = if (varExists && semiExists)
+                then if (eqExists && numExists)
+                        then (Just (Assignment var num), remains)
+                        else (Just (Declaration var), remains)
+                 else (Nothing, prog)
