@@ -9,6 +9,8 @@ import Data.Maybe
 data Statement = Assignment String String
   | Declaration String deriving (Eq, Show)
 
+data Token = Variable String | Number Int | Equals | Semicolon deriving (Eq, Show)
+
 type Program = [Maybe Statement]
 
 -- Generic split
@@ -35,51 +37,34 @@ splitSemi :: String -> (String, String)
 splitSemi = split (\x -> x == ';')
 
 -- tokenize properly
-tokenize :: String -> Maybe (String, String)
-tokenize "" = Just ("", "")
+tokenize :: String -> (Maybe String, String)
+tokenize "" = (Nothing, "")
 tokenize (x:xs)
-  | isAlpha x = Just $ splitId (x:xs)
-  | isDigit x = Just $ splitNum (x:xs)
-  | x == ';'  = Just $ splitSemi (x:xs)
-  | x == '='  = Just $ splitEq (x:xs)
+  | isAlpha x = let (tok, remaining) = splitId (x:xs) in (Just tok, remaining)
+  | isDigit x = let (tok, remaining) = splitNum (x:xs) in (Just tok, remaining)
+  | x == ';'  = let (tok, remaining) = splitSemi (x:xs) in (Just tok, remaining)
+  | x == '='  = let (tok, remaining) = splitEq (x:xs) in (Just tok, remaining)
   | isSpace x = tokenize xs
-  | otherwise = Nothing
+  | otherwise = (Nothing, xs) -- Consume error ?
 
 -- Returns an infinite list of tokens from a program string
 ---- Can exploit Lazy Evaluation
----- If at a certain point the 
+---- If at a certain point the
 tokens :: String -> [Maybe String]
 tokens "" = []
-tokens (x:xs) = t : tokens ts
-  where
-    res = tokenize (x:xs)
-
-    -- y, ys are strings
-    (y, ys) = if (isJust res) then fromJust res else ("", "")
-
-    -- t is a Maybe String, ts is a string
-    (t, ts) = if (isJust res) then (Just y, ys) else (Nothing, (x:xs))
+tokens xs = t : tokens ts
+  where 
+    (t, ts) = tokenize xs
 
 
--- get next token from an infinite list of tokens
-nextToken :: [String] -> Maybe String
-nextToken ts = x
-  where
-    l = take 1 ts
-    x = if (length l > 0) then Just $ ts !! 0 else Nothing
-
-    
-    
--- get next statement
--- takes a list of tokens, and processes them.
-statement :: [String] -> (Maybe Statement, String)
+statement :: String -> (Maybe Statement, String)
 statement tokens = result
   where
     -- Perform splits
-    (var, prog0)    = uncons tokens
-    (eq, prog1)     = uncons prog0
-    (num, prog2)    = uncons prog1
-    (semi, remains) = uncons prog2
+    (var, prog0)    = splitId tokens
+    (eq, prog1)     = splitEq prog0
+    (num, prog2)    = splitNum prog1
+    (semi, remains) = splitSemi prog2
 
     -- Calculate result
     varExists = var /= ""
@@ -90,7 +75,7 @@ statement tokens = result
                 then if (eqExists && numExists)
                         then (Just (Assignment var num), remains)
                         else (Just (Declaration var), remains)
-                 else (Nothing, prog)
+                 else (Nothing, tokens)
 
 -- parse the whole program
 program :: String -> Maybe Program
