@@ -34,6 +34,29 @@ splitNum = split isDigit
 splitSemi :: String -> (String, String)
 splitSemi = split (\x -> x == ';')
 
+-- tokenize properly
+tokenize :: String -> Maybe (String, String)
+tokenize "" = Just ("", "")
+tokenize (x:xs)
+  | isAlpha x = Just $ splitId (x:xs)
+  | isDigit x = Just $ splitNum (x:xs)
+  | x == ';'  = Just $ splitSemi (x:xs)
+  | x == '='  = Just $ splitEq (x:xs)
+  | isSpace x = tokenize xs
+  | otherwise = Nothing
+
+tokens :: String -> [Maybe String]
+tokens "" = []
+tokens (x:xs) = t : tokens ts
+  where
+    res = tokenize (x:xs)
+
+    -- y, ys are strings
+    (y, ys) = if (isJust res) then fromJust res else ("", "")
+
+    -- t is a Maybe String, ts is a string
+    (t, ts) = if (isJust res) then (Just y, ys) else (Nothing, (x:xs))
+    
 -- get next statement
 statement :: String -> (Maybe Statement, String)
 statement prog = result
@@ -64,3 +87,7 @@ program prog = if (isNothing rest) then Nothing else Just (statement0 : (fromJus
     (statement0, remaining) = line
     rest0 = program remaining
     rest = if isNothing statement0  then Nothing else rest0
+
+squares :: [Int] -> [Int]
+squares [] = []
+squares (x:xs) = (x*x) : squares xs
