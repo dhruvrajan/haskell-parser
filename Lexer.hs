@@ -45,6 +45,9 @@ tokenize (x:xs)
   | isSpace x = tokenize xs
   | otherwise = Nothing
 
+-- Returns an infinite list of tokens from a program string
+---- Can exploit Lazy Evaluation
+---- If at a certain point the 
 tokens :: String -> [Maybe String]
 tokens "" = []
 tokens (x:xs) = t : tokens ts
@@ -56,16 +59,27 @@ tokens (x:xs) = t : tokens ts
 
     -- t is a Maybe String, ts is a string
     (t, ts) = if (isJust res) then (Just y, ys) else (Nothing, (x:xs))
+
+
+-- get next token from an infinite list of tokens
+nextToken :: [String] -> Maybe String
+nextToken ts = x
+  where
+    l = take 1 ts
+    x = if (length l > 0) then Just $ ts !! 0 else Nothing
+
+    
     
 -- get next statement
-statement :: String -> (Maybe Statement, String)
-statement prog = result
+-- takes a list of tokens, and processes them.
+statement :: [String] -> (Maybe Statement, String)
+statement tokens = result
   where
     -- Perform splits
-    (var, prog0)    = splitId prog
-    (eq, prog1)     = splitEq prog0
-    (num, prog2)    = splitNum prog1
-    (semi, remains) = splitSemi prog2
+    (var, prog0)    = uncons tokens
+    (eq, prog1)     = uncons prog0
+    (num, prog2)    = uncons prog1
+    (semi, remains) = uncons prog2
 
     -- Calculate result
     varExists = var /= ""
