@@ -88,6 +88,3 @@ program prog = if (isNothing rest) then Nothing else Just (statement0 : (fromJus
     rest0 = program remaining
     rest = if isNothing statement0  then Nothing else rest0
 
-squares :: [Int] -> [Int]
-squares [] = []
-squares (x:xs) = (x*x) : squares xs
