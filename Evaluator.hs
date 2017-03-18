@@ -2,21 +2,24 @@ module Evaluator where
 
 import Lexer
 
+type SymbolTable = String -> Maybe Int
+
 -- Base function for function-based symbol table
-getst :: String -> Maybe String
+getst :: SymbolTable
 getst _ = Nothing
 
 -- Add a key, value pair to a function-based symbol table. Inefficient, but cool.
-addst :: String -> String -> (String -> Maybe String) -> (String -> Maybe String)
+addst :: String -> Int -> SymbolTable -> SymbolTable
 addst var val st = \ x -> if (x == var) then Just val else st x
 
 
 -- Helper
-evaluateHelper :: Program -> (String -> Maybe String) -> (String -> Maybe String)
-evaluateHelper [] g = g
-evaluateHelper ((Just (Assignment var val)) : ls) g = evaluateHelper ls (addst var val g)
-evaluateHelper ((Just (Declaration var)) : ls) g = evaluateHelper ls g
+evaluate1 :: SymbolTable -> Statement -> SymbolTable
+evaluate1 st (Assignment var val) = addst var val st
 
--- Evaluate a Program.
-evaluate :: Program -> (String -> Maybe String) 
-evaluate prog = evaluateHelper prog getst
+evaluate :: Program -> SymbolTable
+evaluate prog = foldl evaluate1 getst prog
+
+-- interpret a program string
+interpret :: String -> SymbolTable
+interpret prog = evaluate $ parse $ tokens prog
