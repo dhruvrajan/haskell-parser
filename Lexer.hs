@@ -6,13 +6,24 @@ module Lexer where
 import Data.Char
 import Data.Maybe
 
-data Token = Variable String | Number Int
-  | Equals | Semicolon | Invalid String deriving (Eq, Show)
+
+data Token = Identifier String | Digits Int
+  | Equals | Semicolon
+  | Invalid String deriving (Eq, Show)
+
+data Expr = Variable String | Number Int
+  | Add Expr Expr | Subtract Expr Expr
+  | Divide Expr Expr | Multiply Expr Expr
+  | Enclosed Expr deriving (Eq, Show)
 
 data Statement = Assignment String Int
   | Declaration String deriving (Eq, Show)
 
 type Program = [Statement]
+
+-- is a character an operator
+isOp :: Char -> Bool
+isOp c = elem c "*=/-"
 
 -- Return (var, remaining)
 splitId :: String -> (String, String)
@@ -34,9 +45,9 @@ splitSemi = span (\x -> x == ';')
 tokenize :: String -> (Token, String)
 tokenize "" = (Invalid "", "")
 tokenize (x:xs)
-  | isAlpha x = let (tok, remaining) = splitId (x:xs) in (Variable tok, remaining)
+  | isAlpha x = let (tok, remaining) = splitId (x:xs) in (Identifier tok, remaining)
   | isDigit x = let (tok, remaining) = splitNum (x:xs)
-    in (Number ((read tok) :: Int), remaining)
+    in (Digits ((read tok) :: Int), remaining)
   | x == ';'  = let (tok, remaining) = splitSemi (x:xs) in (Semicolon, remaining)
   | x == '='  = let (tok, remaining) = splitEq (x:xs) in (Equals, remaining)
   | isSpace x = tokenize xs
@@ -50,11 +61,3 @@ tokens "" = []
 tokens xs = t : tokens ts
   where 
     (t, ts) = tokenize xs
-
-
--- Parse a list of tokens
-parse :: [Token] -> [Statement]
-parse [] = []
-parse (Variable var : Equals : Number val : Semicolon : toks)
-  = (Assignment var val) : parse toks
-parse (t:ts) = parse ts -- LLK parsing error recovery
