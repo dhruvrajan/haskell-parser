@@ -18,5 +18,5 @@ evaluateHelper ((Just (Assignment var val)) : ls) g = evaluateHelper ls (addst v
 evaluateHelper ((Just (Declaration var)) : ls) g = evaluateHelper ls g
 
 -- Evaluate a Program.
-evaluate :: Program -> (String -> Maybe String)
+evaluate :: Program -> (String -> Maybe String) 
 evaluate prog = evaluateHelper prog getst
