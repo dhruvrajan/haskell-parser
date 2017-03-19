@@ -3,17 +3,8 @@ module Evaluator where
 import Lexer
 import Parser
 
---type SymbolTable = String -> Maybe Int
 type SymbolTable = [(String, Int)]
---type SymbolTable = String -> Maybe Int
 
--- Base function for function-based symbol table
---getst :: SymbolTable
---getst _ = Nothing
-
--- Add a key, value pair to a function-based symbol table. Inefficient, but cool.
--- addst :: String -> Int -> SymbolTable -> SymbolTable
--- addst var val st = \ x -> if (x == var) then Just val else st x
 
 -- Add a key and value to an association-list symbol table
 addst :: String -> Int -> SymbolTable -> SymbolTable
@@ -30,7 +21,9 @@ getst var ((name, num) : ls) | var == name = num
 -- evaluate an expression
 evaluateExpr :: SymbolTable -> Expr -> Int
 evaluateExpr st (Add e1 e2) = (evaluateExpr st e1) + (evaluateExpr st e2)
+evaluateExpr st (Subtract e1 e2) = (evaluateExpr st e1) - (evaluateExpr st e2)
 evaluateExpr st (Multiply e1 e2) = (evaluateExpr st e1) * (evaluateExpr st e2)
+evaluateExpr st (Divide e1 e2) = (evaluateExpr st e1) `div` (evaluateExpr st e2)
 evaluateExpr st (Variable string) = getst string st
 evaluateExpr _ (Number num) = num
   

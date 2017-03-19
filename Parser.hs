@@ -2,6 +2,8 @@ module Parser where
 
 import Lexer
 
+expression :: [Token] -> (Expr, [Token])
+
 factor :: [Token] -> (Expr, [Token])
 factor [] = (InvalidExpr $ InvalidToken "", [])
 factor (Identifier name : ts) = (Variable name, ts)
@@ -13,12 +15,14 @@ term :: [Token] -> (Expr, [Token])
 term ts = let (expr, remainder) = factor ts in
   case remainder of
     (Operator "*" : rs) -> let (e, r) = term rs in (Multiply expr e, r)
+    (Operator "/" : rs) -> let (e, r) = term rs in (Divide   expr e, r)
     _                   -> (expr, remainder)
 
-expression :: [Token] -> (Expr, [Token])
+
 expression ts = let (expr, remainder) = term ts in
   case remainder of
     (Operator "+" : rs) -> let (e, r) = expression rs in (Add expr e, r)
+    (Operator "-" : rs) -> let (e, r) = expression rs in (Subtract expr e, r)
     _                   -> (expr, remainder)
 
 

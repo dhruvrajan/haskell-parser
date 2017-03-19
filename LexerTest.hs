@@ -1,7 +1,7 @@
 module LexerTest where
 
 import Lexer
-import Test.HUnit 
+import Test.HUnit
 
 -- Test Assignments
 test1 = TestCase (assertEqual "valid assignment" (Just (Assignment "x" "3"), "y = 4;") (statement "x = 3;y = 4;"))
