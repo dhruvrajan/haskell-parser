@@ -1,6 +1,6 @@
-module Parser where
+module Anatomy.Parser where
 
-import Lexer
+import Anatomy.Lexer
 
 expression :: [Token] -> (Expr, [Token])
 

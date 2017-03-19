@@ -2,7 +2,8 @@
 
 -- Lexer for the 'fun' language defined in cs429h
 
-module Lexer where
+module Anatomy.Lexer where
+
 import Data.Char
 import Data.Maybe
 

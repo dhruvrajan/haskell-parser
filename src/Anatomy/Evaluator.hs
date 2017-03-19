@@ -1,7 +1,7 @@
-module Evaluator where
+module Anatomy.Evaluator where
 
-import Lexer
-import Parser
+import Anatomy.Lexer
+import Anatomy.Parser
 
 type SymbolTable = [(String, Int)]
 
